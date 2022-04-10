@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlmodel import Relationship, SQLModel, Field, Column, Integer, ForeignKey
 
-from app.my_app.models.base_model import DbBaseModel
+from .db_base_models import BaseDBModel
 from .system_user import User
 
 
@@ -11,7 +11,7 @@ class AuthorizationBase(SQLModel):
     is_active: bool = Field(default=True)
 
 
-class Authorization(AuthorizationBase, DbBaseModel, table=True):
+class Authorization(AuthorizationBase, BaseDBModel, table=True):
     __tablename__ = "authorizations"
     """Database Schema"""
 

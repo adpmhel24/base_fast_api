@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlmodel import Column, ForeignKey, Integer, Relationship, SQLModel, Field
 
-from app.my_app.models.base_model import DbBaseModel
+from .db_base_models import BaseDBModel
 from app.my_app.models.company import Company
 
 
@@ -16,7 +16,7 @@ class BranchBase(SQLModel):
     company: Optional[Company] = Relationship(back_populates="branches")
 
 
-class Branch(BranchBase, DbBaseModel, table=True):
+class Branch(BranchBase, BaseDBModel, table=True):
     __tablename__ = "branches"
     """Database Schema"""
 
