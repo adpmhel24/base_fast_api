@@ -1,8 +1,7 @@
 from typing import List, Optional
 from sqlmodel import Relationship, SQLModel, Field
 
-from app.my_app.models.base_model import DbBaseModel
-from app.my_app.models.branch import Branch
+from .db_base_model import BaseDbModel
 
 
 class CompanyBase(SQLModel):
@@ -13,9 +12,10 @@ class CompanyBase(SQLModel):
     is_active: bool = Field(default=True)
 
 
-class Company(CompanyBase, DbBaseModel, table=True):
+class Company(CompanyBase, BaseDbModel, table=True):
+    """Database Model"""
+
     __tablename__ = "companies"
-    """Database Schema"""
 
     branches: List["Branch"] = Relationship(
         sa_relationship_kwargs={"cascade": "delete"}, back_populates="company"
@@ -32,3 +32,8 @@ class CompanyRead(CompanyBase):
     """Read Schema"""
 
     pass
+
+
+from ..models.branch import Branch
+
+Company.update_forward_refs()

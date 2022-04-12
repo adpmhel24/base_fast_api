@@ -1,8 +1,6 @@
-from typing import Optional
-from pydantic import BaseModel
+from typing import List, Optional
 from sqlmodel import Relationship, SQLModel, Field
-
-from app.my_app.models.company import Company
+from ..models.db_base_model import BaseDbModel
 
 
 class BranchBase(SQLModel):
@@ -13,14 +11,16 @@ class BranchBase(SQLModel):
     is_active: bool = Field(default=True)
     company_id: int = Field(nullable=False, index=True, foreign_key="companies.id")
 
-    company: Optional[Company] = Relationship(back_populates="branches")
 
+class Branch(BranchBase, BaseDbModel, table=True):
+    """Database Model"""
 
-class Branch(BranchBase, BaseModel, table=True):
     __tablename__ = "branches"
-    """Database Schema"""
 
-    pass
+    company: Optional["Company"] = Relationship(back_populates="branches")
+    warehouses: List["Warehouse"] = Relationship(
+        sa_relationship_kwargs={"cascade": "delete"}, back_populates="branch"
+    )
 
 
 class BranchCreate(BranchBase):
@@ -33,3 +33,10 @@ class BranchRead(BranchBase):
     """Read Schema"""
 
     pass
+
+
+from ..models.warehouse import Warehouse
+from ..models.company import Company
+
+
+Branch.update_forward_refs()

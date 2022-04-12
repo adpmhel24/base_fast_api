@@ -1,21 +1,47 @@
+import enum
 from typing import Optional
-from sqlmodel import Relationship, SQLModel, Field, Column, Integer, ForeignKey
+from sqlmodel import Enum, Relationship, SQLModel, Field, Column
 
-from app.my_app.models.db_base_model import DbBaseModel
-from .system_user import User
+from .db_base_model import BaseDbModel
+
+
+class AuthRole(str, enum.Enum):
+    unathorized = "unauthorized"
+    create = "create"
+    read = "read"
+    updated = "update"
+    delete = "delete"
+    all = "all"
 
 
 class AuthorizationBase(SQLModel):
     user_id: int = Field(nullable=False, index=True, foreign_key="system_users.id")
-    table_id: int = Field(nullable=False, index=True, foreign_key="tables.id")
+    module_id: int = Field(nullable=False, index=True, foreign_key="modules.id")
+    auth_role: AuthRole = Field(
+        default=AuthRole.unathorized, sa_column=Column(Enum(AuthRole))
+    )
     is_active: bool = Field(default=True)
 
 
-class Authorization(AuthorizationBase, DbBaseModel, table=True):
-    __tablename__ = "authorizations"
-    """Database Schema"""
+class Authorization(AuthorizationBase, BaseDbModel, table=True):
+    """Database Model"""
 
-    user: Optional[User] = Relationship(back_populates="authorizations")
+    __tablename__ = "authorizations"
+
+    user: Optional["SystemUser"] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": "Authorization.user_id==SystemUser.id",
+            "lazy": "joined",
+        },
+        back_populates="auths",
+    )
+
+    module: Optional["Module"] = Relationship(
+        sa_relationship_kwargs={
+            "lazy": "joined",
+            "cascade": "delete",
+        }
+    )
 
 
 class AuthorizationCreate(AuthorizationBase):
@@ -28,3 +54,9 @@ class AuthorizationRead(AuthorizationBase):
     """Read Schema"""
 
     pass
+
+
+from ..models.system_user import SystemUser
+from ..models.module import Module
+
+Authorization.update_forward_refs()

@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from sqlmodel import SQLModel  # new
-from app.db.base import *  # New
+from my_app.db.tables import *  # New
 
 from alembic import context
 
